@@ -1,9 +1,3 @@
-<?php
-require_once 'persistence/PersistenceTAMAS.php';
-session_start();
-$persis= new PersistenceTamas();
-$dpt = $persis -> loadDataFromStore();?>
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -70,15 +64,17 @@ $dpt = $persis -> loadDataFromStore();?>
 					</h1>
 				</div>
 				<form action="CreateJobPosting.php" method="post">
-					<p>Job ID? <select name = "aJobID" > 
+					<?php session_start(); ?>
+				
+					<p>Job ID? <select name = "aJobID" id = "aJobID">
+					<option value='-1'>Choose an option...</option>
 					<?php
-					foreach($dpt->getAllJobs() as $job){ ?>
-						<option value="<?php $job->getJobID();?>">
-						<?php $job->getJobID();?>
-						</option><?php } ?>
-						<option name="aJobID"> </option>
+					foreach($_SESSION['jobNamesArray'] as $key => $value) { ?>
+						<option value="<?php echo $key ?>"><?php echo $value ?></option>
+					<?php
+						} ?>
 				    </select>
-				    
+
 				    <span class="error">
 					<?php
 					if (isset($_SESSION['errorJobID']) && !empty($_SESSION['errorJobID'])){

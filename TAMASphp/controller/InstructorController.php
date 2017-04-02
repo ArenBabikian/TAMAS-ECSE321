@@ -1,12 +1,12 @@
 <?php
-require_once __DIR__.'\..\controller\InvalidInputException.php';
-require_once __DIR__.'\..\persistence\PersistenceTAMAS.php';
-require_once __DIR__.'\..\model\Course.php';
-require_once __DIR__.'\..\model\Department.php';
-require_once __DIR__.'\..\model\Instructor.php';
-require_once __DIR__.'\..\model\Job.php';
-require_once __DIR__.'\..\model\Review.php';
-require_once __DIR__.'\..\model\Student.php';
+require_once 'controller\InvalidInputException.php';
+require_once 'persistence\PersistenceTAMAS.php';
+require_once 'model\Course.php';
+require_once 'model\Department.php';
+require_once 'model\Instructor.php';
+require_once 'model\Job.php';
+require_once 'model\Review.php';
+require_once 'model\Student.php';
 
 class InstructorController
 {
@@ -28,12 +28,12 @@ class InstructorController
 				$validIDFormat = FALSE;
 				break;
 			}
-		}	
-		
+		}
+
 		$validEmailFormat = true;
-		
-		
-		
+
+
+
 		// throw exceptions, if need be
 		if ($instructorName == null || strlen ( $instructorName ) == 0) {
 			$error .= "@1Instructor name cannot be empty!";
@@ -55,15 +55,15 @@ class InstructorController
 		}
 		else{
 			//if inputs are valid
-				
+
 			//2. load data from persistence
 			$persis= new PersistenceTamas();
 			$dpt = $persis -> loadDataFromStore();
-				
+
 			//3. add instructor
 			$instructor = new Instructor($instructorName, $instructorID, $instructorEmail);
 			$dpt->addAllInstructor($instructor);
-				
+
 			//4. store data
 			$persis->writeDataToStore($dpt);
 		}
@@ -85,7 +85,7 @@ class InstructorController
 		}
 		//END REVIEW****************
 
-		
+
 
 		$error = "";
 		//3. validate inputs
@@ -94,14 +94,14 @@ class InstructorController
 		$skillsReq = InvalidInputException::validate_input($skillsRequired);
 		$expReq = InvalidInputException::validate_input($experienceRequired);
 		$offerDate = InvalidInputException::validate_input($offerDeadlineDate);
-		
+
 		$bool_myJob = $myJob == null;
 		$bool_aJobID = $aJobID == null;
 		$bool_myJobDesc = $jobDesc == null || strlen ( $jobDesc ) == 0;
 		$bool_mySkillsReq = $skillsReq == null || strlen ( $skillsReq ) == 0;
 		$bool_myExpReq = $expReq == null || strlen ( $expReq ) == 0;
 		$bool_myOfferDate = $offerDate == null || strlen ( $offerDate ) == 0 || !strtotime($offerDate);
-		
+
 		//if there are issues...
 		if ($bool_myJob) {
 			$error .= "@1Job ";
@@ -126,22 +126,22 @@ class InstructorController
 			throw new Exception (trim($error));
 		}
 		else{
-			
+				
 			//3. remove current version of the job in question
 			$dpt->removeAllJob($myJob);
 			//deletes the job saved in dpt equal to myJob
-			
+				
 			//4. Convert date
 			$dateConv = date('Y-m-d', strtotime($offerDate));
-	
+
 			//5. addding parameters to Job
-	
+
 			//$myJob = new Job($job, $dateConv);
 			$myJob->setJobDescription($jobDesc);
 			$myJob->setSkillsRequired($skillsReq);
 			$myJob->setExperienceRequired($expReq);
 			$myJob->setOfferDeadlineDate($dateConv);
-	
+
 			$myJob->setState(JobStatusEnum::Posted);
 			//REVIEW****************
 			$dpt->addAllJob($myJob);
@@ -151,11 +151,11 @@ class InstructorController
 	}
 
 	public function modifyAllocaion($ajobID, $allocatedStudentID, $appliedStudentID){
-		
+
 		//1. load data
 		$persis= new PersistenceTamas();
 		$dpt = $persis -> loadDataFromStore();
-		
+
 		//2. find job
 		//REVIEW****************
 		$myJob = NULL;
@@ -166,14 +166,14 @@ class InstructorController
 			}
 		}
 		//END REVIEW****************
-		
-		
-		
+
+
+
 		$myAllocStud = NULL;
 		$myApplStud = NULL;
-		
+
 		if($myJob != null){
-				//3. find allocated student
+			//3. find allocated student
 			//REVIEW****************
 			foreach ($myJob->getAllocatedStudent() as $student){
 				if(strcmp($student->getStudentID(), $allocatedStudentID) == 0){
@@ -182,7 +182,7 @@ class InstructorController
 				}
 			}
 			//END REVIEW****************
-			
+				
 			//4. find applied student
 			//REVIEW****************
 			foreach ($myJob->getApplicantt() as $student){
@@ -192,13 +192,13 @@ class InstructorController
 				}
 			}
 		}
-		
+
 		//END REVIEW****************
-		
-		
+
+
 		//5. validating inputs
 		$error = "";
-		
+
 		if ($myJob == null) {
 			$error .= "@1Job ";
 			if($aJobID != null){
@@ -226,15 +226,15 @@ class InstructorController
 		}
 		else{
 			$dpt->removeAllJob($myJob);
-			
+				
 			$myJob->addAllocatedStudent($myApplStud);
 			$myJob->removeAllocatedStudent($myAllocStud);
 			$myJob->removeApplicant($myApplStud);
-			
+				
 			$dpt->addAllJob($myJob);
-			
+				
 			$persis->writeDataToStore($dpt);
-		}	
+		}
 	}
 
 	public function createReview($aninstructorID, $reviewContent, $ajobID, $astudentID){
@@ -242,9 +242,9 @@ class InstructorController
 		//1. load data
 		$persis= new PersistenceTamas();
 		$dpt = $persis -> loadDataFromStore();
-		
+
 		$content = InputValidator::validate_input ( $reviewContent );
-		
+
 		$myReviewer = NULL;
 		foreach ($dpt->getAllInstructors() as $instructor){
 			if(strcmp($instructor->getInstructorID(), $aninstructorID) == 0){
@@ -252,7 +252,7 @@ class InstructorController
 				break;
 			}
 		}
-		
+
 		$myJob = NULL;
 		foreach ($dpt->getAllJobs() as $job){
 			if(strcmp($job->getJobID(), $ajobID) == 0){
@@ -260,23 +260,23 @@ class InstructorController
 				break;
 			}
 		}
-		
+
 		$myReviewee = NULL;
 		if($myJob != null){
-		foreach ($myJob->getEmployee() as $student){
+			foreach ($myJob->getEmployee() as $student){
 				if(strcmp($student->getStudentID(), $aStudentID) == 0){
 					$myReviewee = $student;
 					break;
 				}
 			}
 		}
-		
+
 		$error = "";
-		
+
 		if($content == null || srtlen ($content) == 0){
 			$error .= "@1Review content cannot be empty! ";
 		}
-		
+
 		if ($myReviewer == null) {
 			$error .= "@2Reviewer ";
 			if($aninstructorID != null){
@@ -284,7 +284,7 @@ class InstructorController
 			}
 			$error .= " not found! ";
 		}
-		
+
 		if ($myJob == null) {
 			$error .= "@3Job ";
 			if($aJobID != null){
@@ -292,7 +292,7 @@ class InstructorController
 			}
 			$error .= " not found! ";
 		}
-		
+
 		if ($myReviewee == null) {
 			$error .= "@4Reviewed student ";
 			if($astudentID != null){
@@ -305,19 +305,19 @@ class InstructorController
 			// throw exceptions, if need be
 		}
 		else{
-			
+				
 			$review = new Review ($content, $myReviewee, $myJob, $myReviewer);
 			$dpt->addAllReview($review);
-			
+				
 			$dpt->removeAllStudent($myReviewee);
 			$dpt->removeAllInstructor($myReviewer);
-			
+				
 			$myReviewee->addReviewText($review);
 			$myReviewer->addReviewText($review);
-				
+
 			$dpt->addAllStudent($myReviewee);
 			$dpt->addAllInstructor($myReviewer);
-				
+
 			$persis->writeDataToStore($dpt);
 		}
 	}
